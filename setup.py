@@ -20,7 +20,7 @@ def read(*names, **kwargs):
 
 from distutils.core import Extension
 
-radonc_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c','pynpre/src/npre_alloc.c'])
+nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c','pynpre/src/npre_alloc.c'])
 
 from numpy.distutils.core import setup 
 setup(
@@ -32,7 +32,7 @@ setup(
     author="pynpre developing team",
     author_email="chenyk2016@gmail.com",
     url="https://github.com/chenyk1990/pynpre",
-    ext_modules=[radonc_module],
+    ext_modules=[nprec3d_module],
     packages=['pynpre'],
     include_package_data=True,
     zip_safe=False,

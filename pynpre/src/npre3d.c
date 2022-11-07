@@ -60,24 +60,24 @@ static PyObject *fxynpre(PyObject *self, PyObject *args){
 }
 
 
-// documentation for each functions.
-static char npre3dcfun_document[] = "Document stuff for radon...";
+/*documentation for each functions.*/
+static char npre3dcfun_document[] = "Document stuff for this C module...";
 
-// defining our functions like below:
-// function_name, function, METH_VARARGS flag, function documents
+/*defining our functions like below:
+  function_name, function, METH_VARARGS flag, function documents*/
 static PyMethodDef functions[] = {
   {"fxynpre", fxynpre, METH_VARARGS, npre3dcfun_document},
   {NULL, NULL, 0, NULL}
 };
 
-// initializing our module informations and settings in this structure
-// for more informations, check head part of this file. there are some important links out there.
+/*initializing our module informations and settings in this structure
+for more informations, check head part of this file. there are some important links out there.*/
 static struct PyModuleDef npre3dcfunModule = {
-  PyModuleDef_HEAD_INIT, // head informations for Python C API. It is needed to be first member in this struct !!
-  "npre3dcfun",  // module name
-  NULL, // means that the module does not support sub-interpreters, because it has global state.
+  PyModuleDef_HEAD_INIT, /*head informations for Python C API. It is needed to be first member in this struct !!*/
+  "npre3dcfun",  /*module name*/
+  NULL, /*means that the module does not support sub-interpreters, because it has global state.*/
   -1,
-  functions  // our functions list
+  functions  /*our functions list*/
 };
 
 /*runs while initializing and calls module creation function.*/
