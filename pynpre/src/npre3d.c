@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <numpy/arrayobject.h>
 
+int kiss_fft_next_fast_size(int n);
 
 /*from user/chenyk/vecoper.c */
 static PyObject *fxynpre(PyObject *self, PyObject *args){
@@ -43,6 +44,11 @@ static PyObject *fxynpre(PyObject *self, PyObject *args){
     }
 
 	/*sub-function goes here*/
+	
+	
+	int nt, opt=1,n1=511;
+	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
+	printf("n1=%d,nt=%d\n",n1,nt);
 	
 	
     /*Below is the output part*/

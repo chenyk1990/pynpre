@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <complex.h>
 
 void *np_alloc (size_t n    /* number of elements */, 
 			  size_t size /* size of one element */)
@@ -35,4 +36,15 @@ int *np_intalloc (size_t n /* number of elements */)
     ptr = (int*) np_alloc (n,sizeof(int));
     return ptr;
 }
+
+typedef float complex np_complex;
+
+np_complex *np_complexalloc (size_t n /* number of elements */) 
+	  /*< complex allocation >*/
+{
+    np_complex *ptr;
+    ptr = (np_complex*) np_alloc (n,sizeof(np_complex));
+    return ptr;
+}
+
 
