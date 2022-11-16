@@ -6,23 +6,46 @@ Reference: Wang et al. (2021), Non-stationary predictive filtering for seismic r
   Copyright (C) 2016 Yangkang Chen
 */
 
-#include <rsf.h>
-#include "fft1.h"
-#include "cdivn.h"
-#include "cdivn_fs.h"
-#include "cdivn_rnar.h"
-#include "cdivnn.h"
-#include "cdivns.h" /*stationary division in traditional FXY*/
+// #include <rsf.h>
+// #include "fft1.h"
+// #include "cdivn.h"
+// #include "cdivn_fs.h"
+// #include "cdivn_rnar.h"
+// #include "cdivnn.h"
+// #include "cdivns.h" /*stationary division in traditional FXY*/
+// 
+#include <math.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include "npre_komplex.h"
+
+#ifndef KISS_FFT_H
+#include "npre_kissfft.h"
+#endif
+
+#include "npre_dtype.h"
+#include "npre_alloc.h"
+
+// #include "npre_fxynpre.h"
+#include "npre_cdivn.h"
+
+#define SF_MAX_DIM 9
 
 
-
-
-
-
-
-
-
-
+void fft1(float **ompP /*input data*/, 
+		kiss_fft_cpx **ompQ,
+		int n2,
+		int n1,
+		float d1,
+		float o1, 		
+		int nt,
+		int nw,
+		float dw,
+		bool sym, 
+		bool opt,
+		bool verb, 		
+		bool inv);
+		
 void fxynpre0(float **dtime /*input and output data*/, 
 		int n2,
 		int nx,
@@ -48,7 +71,7 @@ void fxynpre0(float **dtime /*input and output data*/,
 	/* Part I:  Fourier transform */	
  	/* determine wavenumber sampling (for real to complex FFT) */
 	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
-	/*	if (nt0!=nt) sf_error("nt should be consistant");*/
+	/*	if (nt0!=nt) np_error("nt should be consistant");*/
 
 	if (nt%2) nt++;
 	nw = nt/2+1;
@@ -56,7 +79,7 @@ void fxynpre0(float **dtime /*input and output data*/,
     
     kiss_fft_cpx **dfft;
     
-    dfft = (kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+    dfft = (kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		             
     /*forward transform*/
     fft1(dtime, dfft, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, false);
@@ -68,9 +91,9 @@ void fxynpre0(float **dtime /*input and output data*/,
 	kiss_fft_cpx **dfftpre;
 	kiss_fft_cpx ***dfftshift;
 
-	dfftfilt=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);		
-	dfftshift=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);	
-	dfftpre=(kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+	dfftfilt=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);		
+	dfftshift=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);	
+	dfftpre=(kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		
 
 	is=-1;
@@ -104,11 +127,11 @@ void fxynpre0(float **dtime /*input and output data*/,
 	else		/*3D denoising*/
 		dim=3;
 	
-	sf_warning("nsx=%d,nsy=%d,ns=%d",nsx,nsy,ns);
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+	printf("nsx=%d,nsy=%d,ns=%d\n",nsx,nsy,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
-    cmultidivn_init(ns, dim, nd, m, rect, (sf_complex *) dfftshift[0][0], verb); 
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    cmultidivn_init(ns, dim, nd, m, rect, (np_complex *) dfftshift[0][0], verb); 
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
     mean = 0.;
         
@@ -116,7 +139,7 @@ void fxynpre0(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	mean += sf_crealf(sf_cmul(sf_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
+	mean += np_crealf(np_cmul(np_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
     }
 
     mean = sqrtf (n12/mean);
@@ -125,26 +148,26 @@ void fxynpre0(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],mean);
+	dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],mean);
     }
     
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfft[i2][i1] = sf_crmul(dfft[i2][i1],mean);
+	dfft[i2][i1] = np_crmul(dfft[i2][i1],mean);
     }
     
-    cmultidivn ((sf_complex *) dfft[0], (sf_complex *) dfftfilt[0][0],niter);
+    cmultidivn ((np_complex *) dfft[0], (np_complex *) dfftfilt[0][0],niter);
 	
 
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
 	{
-	    dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],1./mean);
+	    dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],1./mean);
 	}
 	
-	cweight2_lop(false,false,n12,nd,(sf_complex *) dfftfilt[0][0], (sf_complex *) dfftpre[0]);
+	cweight2_lop(false,false,n12,nd,(np_complex *) dfftfilt[0][0], (np_complex *) dfftpre[0]);
 		
     /*inverse transform*/
     fft1(dtime, dfftpre, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, true);   
@@ -185,7 +208,7 @@ void fxynpre(float **dtime /*input and output data*/,
 	/* Part I:  Fourier transform */	
  	/* determine wavenumber sampling (for real to complex FFT) */
 	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
-	/*	if (nt0!=nt) sf_error("nt should be consistant");*/
+	/*	if (nt0!=nt) np_error("nt should be consistant");*/
 
 	if (nt%2) nt++;
 	nw = nt/2+1;
@@ -193,7 +216,7 @@ void fxynpre(float **dtime /*input and output data*/,
     
     kiss_fft_cpx **dfft;
     
-    dfft = (kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+    dfft = (kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		             
     /*forward transform*/
     fft1(dtime, dfft, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, false);
@@ -205,9 +228,9 @@ void fxynpre(float **dtime /*input and output data*/,
 	kiss_fft_cpx **dfftpre;
 	kiss_fft_cpx ***dfftshift;
 
-	dfftfilt=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);		
-	dfftshift=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);	
-	dfftpre=(kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+	dfftfilt=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);		
+	dfftshift=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);	
+	dfftpre=(kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		
 
 	is=-1;
@@ -242,7 +265,7 @@ void fxynpre(float **dtime /*input and output data*/,
 		dim=3;
 
 	int **rct;float quad;
-	rct=sf_intalloc2(2,nw);
+	rct=np_intalloc2(2,nw);
 	for(i1=0;i1<nw;i1++)
 	{
 		if(i1<=nw/6)
@@ -255,17 +278,17 @@ void fxynpre(float **dtime /*input and output data*/,
 		rct[0][i1]=rect[1]+quad*(Ntimes*rect[1]-rect[1]); /*from reference radius to Ntimes of ref gradually*//*default: Ntimes=5*/
 		rct[1][i1]=rect[2]+quad*(Ntimes*rect[2]-rect[2]); /*from reference radius to Ntimes of ref gradually*/
 		}
-/*		sf_warning("R[%d]=%d",i1,rct[0][i1]);*/
+/*		printf("R[%d]=%d",i1,rct[0][i1]);*/
 	}
-	sf_warning("Rf = %d is unchanged",rect[0]);
-	sf_warning("Rx changes from %d to %d",rect[1],rct[0][nw-1]);
-	sf_warning("Ry changes from %d to %d",rect[2],rct[1][nw-1]);
+	printf("Rf = %d is unchanged\n",rect[0]);
+	printf("Rx changes from %d to %d\n",rect[1],rct[0][nw-1]);
+	printf("Ry changes from %d to %d\n",rect[2],rct[1][nw-1]);
 
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
-    cmultidivn_fs_init(ns, dim, nd, m, rect[0], rct, (sf_complex *) dfftshift[0][0], verb); 
+    cmultidivn_fs_init(ns, dim, nd, m, rect[0], rct, (np_complex *) dfftshift[0][0], verb); 
     /*frequency-dependent smoothing*/
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
     mean = 0.;
         
@@ -273,7 +296,7 @@ void fxynpre(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	mean += sf_crealf(sf_cmul(sf_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
+	mean += np_crealf(np_cmul(np_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
     }
 
     mean = sqrtf (n12/mean);
@@ -282,22 +305,22 @@ void fxynpre(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],mean);
+	dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],mean);
     }
     
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfft[i2][i1] = sf_crmul(dfft[i2][i1],mean);
+	dfft[i2][i1] = np_crmul(dfft[i2][i1],mean);
     }
-    cmultidivn_fs ((sf_complex *) dfft[0], (sf_complex *) dfftfilt[0][0],niter);
+    cmultidivn_fs ((np_complex *) dfft[0], (np_complex *) dfftfilt[0][0],niter);
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
 	{
-	    dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],1./mean);
+	    dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],1./mean);
 	}
-	cweight2_lop(false,false,n12,nd,(sf_complex *) dfftfilt[0][0], (sf_complex *) dfftpre[0]);
+	cweight2_lop(false,false,n12,nd,(np_complex *) dfftfilt[0][0], (np_complex *) dfftpre[0]);
 	
     /*inverse transform*/
     fft1(dtime, dfftpre, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, true);   
@@ -336,7 +359,7 @@ void fxynpre1(float **dtime /*input and output data*/,
 	/* Part I:  Fourier transform */	
  	/* determine wavenumber sampling (for real to complex FFT) */
 	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
-	/*	if (nt0!=nt) sf_error("nt should be consistant");*/
+	/*	if (nt0!=nt) np_error("nt should be consistant");*/
 
 	if (nt%2) nt++;
 	nw = nt/2+1;
@@ -344,7 +367,7 @@ void fxynpre1(float **dtime /*input and output data*/,
     
     kiss_fft_cpx **dfft;
     
-    dfft = (kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+    dfft = (kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		             
     /*forward transform*/
     fft1(dtime, dfft, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, false);
@@ -356,9 +379,9 @@ void fxynpre1(float **dtime /*input and output data*/,
 	kiss_fft_cpx **dfftpre;
 	kiss_fft_cpx ***dfftshift;
 
-	dfftfilt=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);		
-	dfftshift=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);	
-	dfftpre=(kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+	dfftfilt=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);		
+	dfftshift=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);	
+	dfftpre=(kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		
 
 	is=-1;
@@ -391,9 +414,9 @@ void fxynpre1(float **dtime /*input and output data*/,
 		dim=2;
 	else		/*3D denoising*/
 		dim=3;
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
-    cmultidivn_rnar_init(ns, dim, nd, m, rect, (sf_complex *) dfftshift[0][0], verb); 
-    if(verb) sf_warning("rect[0]=%d,rect[1]=%d,rect[2]=%d",rect[0],rect[1],rect[2]);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
+    cmultidivn_rnar_init(ns, dim, nd, m, rect, (np_complex *) dfftshift[0][0], verb); 
+    if(verb) printf("rect[0]=%d,rect[1]=%d,rect[2]=%d\n",rect[0],rect[1],rect[2]);
     
 
     mean = 0.;
@@ -402,7 +425,7 @@ void fxynpre1(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	mean += sf_crealf(sf_cmul(sf_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
+	mean += np_crealf(np_cmul(np_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
     }
 
     mean = sqrtf (n12/mean);
@@ -411,25 +434,25 @@ void fxynpre1(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],mean);
+	dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],mean);
     }
     
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfft[i2][i1] = sf_crmul(dfft[i2][i1],mean);
+	dfft[i2][i1] = np_crmul(dfft[i2][i1],mean);
     }
 
-    cmultidivn_rnar ((sf_complex *) dfft[0], (sf_complex *) dfftfilt[0][0],niter);
+    cmultidivn_rnar ((np_complex *) dfft[0], (np_complex *) dfftfilt[0][0],niter);
 
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
 	{
-	    dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],1./mean);
+	    dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],1./mean);
 	}
 	
-	cweight2_lop(false,false,n12,nd,(sf_complex *) dfftfilt[0][0], (sf_complex *) dfftpre[0]);
+	cweight2_lop(false,false,n12,nd,(np_complex *) dfftfilt[0][0], (np_complex *) dfftpre[0]);
 		
     /*inverse transform*/
     fft1(dtime, dfftpre, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, true);   
@@ -469,7 +492,7 @@ void fxynpre3(float **dtime /*input and output data*/,
 	/* Part I:  Fourier transform */	
  	/* determine wavenumber sampling (for real to complex FFT) */
 	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
-	/*	if (nt0!=nt) sf_error("nt should be consistant");*/
+	/*	if (nt0!=nt) np_error("nt should be consistant");*/
 
 	if (nt%2) nt++;
 	nw = nt/2+1;
@@ -477,7 +500,7 @@ void fxynpre3(float **dtime /*input and output data*/,
     
     kiss_fft_cpx **dfft;
     
-    dfft = (kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+    dfft = (kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		             
     /*forward transform*/
     fft1(dtime, dfft, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, false);
@@ -489,9 +512,9 @@ void fxynpre3(float **dtime /*input and output data*/,
 	kiss_fft_cpx **dfftpre;
 	kiss_fft_cpx ***dfftshift;
 
-	dfftfilt=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);		
-	dfftshift=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);	
-	dfftpre=(kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+	dfftfilt=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);		
+	dfftshift=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);	
+	dfftpre=(kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		
 
 	is=-1;
@@ -526,7 +549,7 @@ void fxynpre3(float **dtime /*input and output data*/,
 		dim=3;
 
 // 	int **rct;
-// 	rct=sf_intalloc2(2,nw);
+// 	rct=np_intalloc2(2,nw);
 // 	for(i1=0;i1<nw;i1++)
 // 	{
 // 		if(i1<=nw/2)
@@ -539,11 +562,11 @@ void fxynpre3(float **dtime /*input and output data*/,
 // 		}
 // 	}
 	
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
-    cmultidivnn_init(ns, dim, nd, m, rect, rct, sft, (sf_complex *) dfftshift[0][0], verb); 
+    cmultidivnn_init(ns, dim, nd, m, rect, rct, sft, (np_complex *) dfftshift[0][0], verb); 
     /*frequency-dependent smoothing*/
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
     mean = 0.;
         
@@ -551,7 +574,7 @@ void fxynpre3(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	mean += sf_crealf(sf_cmul(sf_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
+	mean += np_crealf(np_cmul(np_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
     }
 
     mean = sqrtf (n12/mean);
@@ -560,27 +583,27 @@ void fxynpre3(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],mean);
+	dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],mean);
     }
     
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfft[i2][i1] = sf_crmul(dfft[i2][i1],mean);
+	dfft[i2][i1] = np_crmul(dfft[i2][i1],mean);
     }
-    sf_warning("cmultidivnn starts!");
-    cmultidivnn ((sf_complex *) dfft[0], (sf_complex *) dfftfilt[0][0],niter);
-	sf_warning("cmultidivnn finishes!");
+    printf("cmultidivnn starts!\n");
+    cmultidivnn ((np_complex *) dfft[0], (np_complex *) dfftfilt[0][0],niter);
+	printf("cmultidivnn finishes!\n");
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
 	{
-	    dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],1./mean);
+	    dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],1./mean);
 	}
 	
-	sf_warning("cweight starts!");
-	cweight2_lop(false,false,n12,nd,(sf_complex *) dfftfilt[0][0], (sf_complex *) dfftpre[0]);
-	sf_warning("cweight finishes!");
+	printf("cweight starts!\n");
+	cweight2_lop(false,false,n12,nd,(np_complex *) dfftfilt[0][0], (np_complex *) dfftpre[0]);
+	printf("cweight finishes!\n");
 	
     /*inverse transform*/
     fft1(dtime, dfftpre, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, true);   
@@ -618,7 +641,7 @@ void fxypre(float **dtime /*input and output data*/,
 	/* Part I:  Fourier transform */	
  	/* determine wavenumber sampling (for real to complex FFT) */
 	nt = opt? 2*kiss_fft_next_fast_size((n1+1)/2): n1;
-	/*	if (nt0!=nt) sf_error("nt should be consistant");*/
+	/*	if (nt0!=nt) np_error("nt should be consistant");*/
 
 	if (nt%2) nt++;
 	nw = nt/2+1;
@@ -626,7 +649,7 @@ void fxypre(float **dtime /*input and output data*/,
     
     kiss_fft_cpx **dfft;
     
-    dfft = (kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+    dfft = (kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		             
     /*forward transform*/
     fft1(dtime, dfft, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, false);
@@ -638,9 +661,9 @@ void fxypre(float **dtime /*input and output data*/,
 	kiss_fft_cpx **dfftpre;
 	kiss_fft_cpx ***dfftshift;
 
-	dfftfilt=(kiss_fft_cpx**)  sf_complexalloc2(nw,ns);		
-	dfftshift=(kiss_fft_cpx***)  sf_complexalloc3(nw,n2,ns);	
-	dfftpre=(kiss_fft_cpx**)  sf_complexalloc2(nw,n2);
+	dfftfilt=(kiss_fft_cpx**)  np_complexalloc2(nw,ns);		
+	dfftshift=(kiss_fft_cpx***)  np_complexalloc3(nw,n2,ns);	
+	dfftpre=(kiss_fft_cpx**)  np_complexalloc2(nw,n2);
 		
 
 	is=-1;
@@ -675,19 +698,19 @@ void fxypre(float **dtime /*input and output data*/,
 	else		/*3D denoising*/
 		dim=2;
 		
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
     
     rect[1]=1;rect[2]=1;
-    if(verb) sf_warning("rect[0]=%d,rect[1]=%d,rect[2]=%d",rect[0],rect[1],rect[2]);
-    cmultidivns_init(ns, 1, nd, m, rect, (sf_complex *) dfftshift[0][0], verb); 
-    if(verb) sf_warning("n12=%d,nd=%d,ns=%d",n12,nd,ns);
+    if(verb) printf("rect[0]=%d,rect[1]=%d,rect[2]=%d\n",rect[0],rect[1],rect[2]);
+    cmultidivns_init(ns, 1, nd, m, rect, (np_complex *) dfftshift[0][0], verb); 
+    if(verb) printf("n12=%d,nd=%d,ns=%d\n",n12,nd,ns);
 
     mean = 0.;
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	mean += sf_crealf(sf_cmul(sf_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
+	mean += np_crealf(np_cmul(np_conjf(dfftshift[is][i2][i1]),dfftshift[is][i2][i1]));
     }
     mean = sqrtf (n12/mean);
     
@@ -695,24 +718,24 @@ void fxypre(float **dtime /*input and output data*/,
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],mean);
+	dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],mean);
     }
     
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
     {
-	dfft[i2][i1] = sf_crmul(dfft[i2][i1],mean);
+	dfft[i2][i1] = np_crmul(dfft[i2][i1],mean);
     }
-    cmultidivns ((sf_complex *) dfft[0], (sf_complex *) dfftfilt[0],niter);
+    cmultidivns ((np_complex *) dfft[0], (np_complex *) dfftfilt[0],niter);
 	
 
     for(is=0;is<ns;is++)
     for(i2=0;i2<n2;i2++)
     for(i1=0;i1<nw;i1++)
 	{
-	    dfftshift[is][i2][i1] = sf_crmul(dfftshift[is][i2][i1],1./mean);
+	    dfftshift[is][i2][i1] = np_crmul(dfftshift[is][i2][i1],1./mean);
 	}
-	cweight2s_lop(false,false,nw*ns,nd,(sf_complex *) dfftfilt[0], (sf_complex *) dfftpre[0]);
+	cweight2s_lop(false,false,nw*ns,nd,(np_complex *) dfftfilt[0], (np_complex *) dfftpre[0]);
 	
     /*inverse transform*/
     fft1(dtime, dfftpre, n2,n1,d1,o1,nt,nw,dw, sym, opt, verb, true);   

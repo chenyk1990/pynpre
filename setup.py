@@ -20,7 +20,21 @@ def read(*names, **kwargs):
 
 from distutils.core import Extension
 
-nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c','pynpre/src/npre_alloc.c','pynpre/src/npre_kissfft.c','pynpre/src/npre_fft1.c'])
+nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c',
+												'pynpre/src/npre_fxynpre.c',
+												'pynpre/src/npre_alloc.c',
+												'pynpre/src/npre_kissfft.c',
+												'pynpre/src/npre_komplex.c',
+												'pynpre/src/npre_conjgrad.c',
+												'pynpre/src/npre_cdivn.c',
+												'pynpre/src/npre_triangle.c',
+												'pynpre/src/npre_trianglen.c',
+												'pynpre/src/npre_ntriangle.c',
+												'pynpre/src/npre_ntrianglen.c',		
+												'pynpre/src/npre_decart.c',	
+												'pynpre/src/npre_win.c',	
+												'pynpre/src/npre_memcpy.c',			
+												'pynpre/src/npre_fft1.c'])
 
 from numpy.distutils.core import setup 
 setup(

@@ -1,23 +1,12 @@
 /* 1D Fourier transform */
 /*
   Copyright (C) 2016 Yangkang Chen
-  Modified in pynpre in 2022
 */
 
-/*below is the including part*/
-#include <math.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include "npre_alloc.h"
-
-#ifndef KISS_FFT_H
-#include "npre_kissfft.h"
-#endif
-
-#include "npre_komplex.h"
+// #include<rsf.h>
+// #include"fft1.h"
 
 #define SF_PI (3.14159265358979323846264338328)
-/*above is the including part*/
 
 int omp_init(void)
 /*< init OMP parameters >*/
@@ -27,8 +16,15 @@ int omp_init(void)
     return ompnth;
 }
 
-/*above is the including part*/
-		
+kiss_fft_cpx np_cmul(kiss_fft_cpx a, kiss_fft_cpx b)
+/*< complex multiplication >*/
+{
+    kiss_fft_cpx c;
+    c.r = a.r*b.r-a.i*b.i;
+    c.i = a.i*b.r+a.r*b.i;
+    return c;
+}
+
 void fft1(float **ompP /*input data*/, 
 		kiss_fft_cpx **ompQ,
 		int n2,
