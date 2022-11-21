@@ -1,6 +1,8 @@
 
-#  DEMO script (python version) for NPRE
-#  
+#  DEMO script (python version) for NPRE (benchmarked with Madagascar version, should be correct)
+#  This synthetic data is biased towards the DRR method
+#  Please keep an eye on other examples that show superior performance of NPRE 
+#
 #  Copyright (C) 2022 Yangkang Chen
 #  
 #  This program is free software: you can redistribute it and/or modify
@@ -78,10 +80,11 @@ n=0.2*np.random.randn(n1,n2,n3);
 dn=d0+n;
 print(np.std(dn))
 
+
 # d1=pd.drr3d(dn,0,120,0.004,3,100);	#RR
 # d1=dn;
 # d1=npre.npre3d(dn,n1win=50,n2win=20,n3win=20,rect=[3,3,3],niter=50,mode=1)
-d1=npre.npre3d(dn,rect=[2,2,2],niter=50,mode=2)
+d1=npre.npre3d(dn,rect=[2,2,2],niter=50,mode=0) #mode=2 is better
 noi1=dn-d1;
 
 d2=pd.drr3d(dn,0,120,0.004,3,3);	#DRR
@@ -111,20 +114,18 @@ plt.title('Noise (DRR)');
 plt.savefig('test_pynpre_syn3d.png',format='png',dpi=300);
 plt.show()
 
+## Save as binary files
+dn=np.float32(dn)
+fid = open ("syn3d_dn.bin", "wb") #binary file format, int
+fid.write(dn.flatten(order='F'))
 
-# import pynpre as npre
-# import numpy as np
-# din=np.random.randn(1001)
-# 
-# 
-# 
-# 
-# dout=npre.npre3d(din)
-# 
-# 
-# 
-# 
-# err=np.linalg.norm(din-dout)
-# print(err)
+d0=np.float32(d0)
+fid = open ("syn3d_dc.bin", "wb") #binary file format, int
+fid.write(d0.flatten(order='F'))
 
+d1=np.float32(d1)
+fid = open ("syn3d_d1.bin", "wb") #binary file format, int
+fid.write(d1.flatten(order='F'))
+
+#sfbin2rsf <syn3d_dn.bin n1=300 n2=400 d1=1 d2=1 o1=0 o2=0 |sfgrey |sfpen
 

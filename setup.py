@@ -39,7 +39,7 @@ nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c',
 from numpy.distutils.core import setup 
 setup(
     name="pynpre",
-    version="0.0.1",
+    version="0.0.2",
     license='GNU General Public License, Version 3 (GPLv3)',
     description="A python package of non-stationary predictive filtering for denoising and interpolation of multi-dimensional multi-channel seismic data",
     long_description=long_description,

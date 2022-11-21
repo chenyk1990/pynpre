@@ -30,8 +30,6 @@ def npre3d(din,d1=0.004,o1=0,n1win=None,n2win=None,n3win=None,nsx=2,nsy=2,niter=
 		din=np.expand_dims(din, axis=2)
 		
 	[n1,n2,n3]=din.shape
-	print('n1,n2,n3=',n1,n2,n3)
-	print('opt=',opt)
 	
 	din=np.float32(din.flatten(order='F'))
 	
