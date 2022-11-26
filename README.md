@@ -62,12 +62,6 @@ or using Pypi
     The "demo" directory contains all runable scripts to demonstrate different applications of pynpre. 
 
 -----------
-## Gallery
-The gallery figures of the pynprepackage can be found at
-    https://github.com/chenyk1990/gallery/tree/main/pynpre
-Each figure in the gallery directory corresponds to a DEMO script in the "demo" directory with the exactly the same file name.
-
------------
 ## Dependence Packages
 * scipy 
 * numpy 
@@ -89,9 +83,21 @@ Each figure in the gallery directory corresponds to a DEMO script in the "demo" 
     chenyk2016@gmail.com
 
 -----------
-## Examples
+## Gallery
+The gallery figures of the pynpre package can be found at
+    https://github.com/chenyk1990/gallery/tree/main/pynpre
+Each figure in the gallery directory corresponds to a DEMO script in the "demo" directory with the exactly the same file name.
 
-Under construction
+These gallery figures are also presented below. 
 
-<!-- <img src='./test.png' alt='Adj' width=960/> -->
+DEMO1 (test_pynpre_syn2d.py)
 
+<img src='https://github.com/chenyk1990/gallery/blob/main/pynpre/test_pynpre_syn2d.png' alt='DEMO1' width=960/>
+
+DEMO2 (test_pynpre_syn3d.py) This example is to show that there are no perfect denoising methods. One can work on a certain type of data, but not all. The plane-wave synthetic example is biased towards the damped rank-reduction (DRR) method. However, NPRE works perfect on curving and non-stationary seismic data.
+
+<img src='https://github.com/chenyk1990/gallery/blob/main/pynpre/test_pynpre_syn3d.png' alt='DEMO2' width=960/>
+
+DEMO3 (test_pynpre_real3d.py) 
+
+<img src='https://github.com/chenyk1990/gallery/blob/main/pynpre/test_pynpre_real3d.png' alt='DEMO3' width=960/>
