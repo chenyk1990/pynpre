@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- encoding: utf8 -*-
-import glob
-import inspect
 import io
 import os
 
-from setuptools import find_packages
+#from setuptools import find_packages
 from setuptools import setup
+from distutils.core import Extension
+import numpy
 
 
 long_description = """
@@ -34,9 +34,26 @@ nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c',
 												'pynpre/src/npre_decart.c',	
 												'pynpre/src/npre_win.c',	
 												'pynpre/src/npre_memcpy.c',			
-												'pynpre/src/npre_fft1.c'])
+												'pynpre/src/npre_fft1.c'],
+                                                include_dirs=[numpy.get_include()])
 
-from numpy.distutils.core import setup 
+ftfa_module = Extension('ftfacfun', sources=['pynpre/src/npre3d.c',
+                                                'pynpre/src/npre_fxynpre.c',
+                                                'pynpre/src/npre_alloc.c',
+                                                'pynpre/src/npre_kissfft.c',
+                                                'pynpre/src/npre_komplex.c',
+                                                'pynpre/src/npre_conjgrad.c',
+                                                'pynpre/src/npre_cdivn.c',
+                                                'pynpre/src/npre_triangle.c',
+                                                'pynpre/src/npre_trianglen.c',
+                                                'pynpre/src/npre_ntriangle.c',
+                                                'pynpre/src/npre_ntrianglen.c',
+                                                'pynpre/src/npre_decart.c',
+                                                'pynpre/src/npre_win.c',
+                                                'pynpre/src/npre_memcpy.c',
+                                                'pynpre/src/npre_fft1.c'],
+                                                include_dirs=[numpy.get_include()])
+                                                
 setup(
     name="pynpre",
     version="0.0.2",
@@ -46,7 +63,7 @@ setup(
     author="pynpre developing team",
     author_email="chenyk2016@gmail.com",
     url="https://github.com/chenyk1990/pynpre",
-    ext_modules=[nprec3d_module],
+    ext_modules=[nprec3d_module,ftfa_module],
     packages=['pynpre'],
     include_package_data=True,
     zip_safe=False,
