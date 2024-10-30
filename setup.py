@@ -37,7 +37,7 @@ nprec3d_module = Extension('npre3dcfun', sources=['pynpre/src/npre3d.c',
 												'pynpre/src/npre_fft1.c'],
                                                 include_dirs=[numpy.get_include()])
 
-ftfa_module = Extension('ftfacfun', sources=['pynpre/src/npre3d.c',
+ftfa_module = Extension('ftfacfun', sources=['pynpre/src/tf.c',
                                                 'pynpre/src/npre_fxynpre.c',
                                                 'pynpre/src/npre_alloc.c',
                                                 'pynpre/src/npre_kissfft.c',
