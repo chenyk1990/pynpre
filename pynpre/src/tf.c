@@ -268,9 +268,6 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
     }
     
     int i, j, m;
-//    if (ntw%2 == 0)
-//        ntw = (ntw+1);
-//    m = (ntw-1)/2;
     nw=nf;
     ndata=n1;
 
@@ -279,18 +276,8 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
     float t, w, w0, dw, mean=0.0f;
     float *mm, *ww;
 
-//    nw=nf;
     dw=1./(n1*dt);
     w0=flo/dt;
-    
-//    if(opt)
-//        nt = 2*kiss_fft_next_fast_size((ntw+1)/2);
-//    else
-//        nt=ntw;
-//    if (nt%2) nt++;
-//    nw = nt/2+1;
-//    dw = 1./(nt*dt);
-//    w0 = 0.;
 
     printf("n1=%d,nw=%d,nt=%d\n",n1,nw,n1);
     printf("dw=%g,w0=%g,dt=%g\n",dw,w0,dt);
@@ -299,14 +286,6 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
     kiss_fft_cpx *pp, ce, *outp;
     float *p, *inp, *tmp;
     float wt, snfhift;
-
-    
-//    p = np_floatalloc(nt);
-//    pp = (kiss_fft_cpx*) np_complexalloc(nw);
-//    cfg = kiss_fftr_alloc(nt,inv?1:0,NULL,NULL);
-//    wt = sym? 1./sqrtf((float) nt): 1.0/nt;
-
-//    printf("sym=%d,wt=%g\n",sym,wt);
     
     inp = np_floatalloc(n1);
     tmp = np_floatalloc(n1*nw*2);
@@ -342,7 +321,7 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
         kiss_fft_cfg tfft, itfft;
 
         nw = 2*kiss_fft_next_fast_size((n1+1)/2);
-        printf("nf=%d,nw=%d\n",nf,nw);
+        printf("In this program, nf=%d,nw=%d are different, remember\n",nf,nw);
         
         tfft = kiss_fft_alloc(nw,0,NULL,NULL);
         itfft = kiss_fft_alloc(nw,1,NULL,NULL);
@@ -405,11 +384,10 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
                 }
             }
         }
-        
-//        free(pp);
-//        free(qq);
-//        free(d);
-//        free(g);
+        free(pp);
+        free(qq);
+        free(d);
+        free(g);
         
     }else{
     /*This part is to reconstruct the data given the basis functions and their weights (i.e., TF spectrum)*/
@@ -425,7 +403,7 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
         outp[i]=np_cmplx(tmp[i],tmp[i+n1*nw]); /* first/second in 3rd dimension is real/imag */
     }
 
-        printf("nw=%d\n",nw);
+        printf("nw before this line =%d\n",nw);
         int i, i1, l2;
 
         kiss_fft_cpx *d, *pp;
@@ -437,7 +415,7 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
         pp = (kiss_fft_cpx*) np_complexalloc(nw);
         d =  (kiss_fft_cpx*) np_complexalloc(nw);
 
-        printf("nw=%d\n",nw);
+        printf("nw after this line =%d\n",nw);
         
         for (i=0; i < nw; i++) {
             pp[i].r = 0.;
@@ -468,8 +446,6 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
         }
         free(pp);
         free(d);
-
-        printf("Hellow333\n");
         
     /*sub-function goes here*/
     }
@@ -477,7 +453,6 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
     PyArrayObject *vecout;
     npy_intp dims[2];
     
-    printf("Hello\n");
     if(!inv)
     {
 
@@ -486,18 +461,14 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
             tmp[i]=outp[i].r;
             tmp[i+ndata*nf]=outp[i].i;
         }
-        printf("Hello2\n");
     dims[0]=ndata*nf*2+3;dims[1]=1;
     vecout=(PyArrayObject *) PyArray_SimpleNew(1,dims,NPY_FLOAT);
-        printf("ndata=%d,nf=%d\n",ndata,nf);
     for(i=0;i<ndata*nf*2;i++)
         (*((float*)PyArray_GETPTR1(vecout,i))) = tmp[i];
     printf("w0=%g,dw=%g,nw=%d\n",w0,dw,nf);
     (*((float*)PyArray_GETPTR1(vecout,0+ndata*nf*2))) = w0;
     (*((float*)PyArray_GETPTR1(vecout,1+ndata*nf*2))) = dw;
     (*((float*)PyArray_GETPTR1(vecout,2+ndata*nf*2))) = nf;
-    
-        printf("Hello3\n");
     }else{
     
     dims[0]=n1;dims[1]=1;

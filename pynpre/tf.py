@@ -6,21 +6,25 @@ def st1d(din,dt=0.004,inv=0,flo=0,fhi=0.5,verb=1):
     
     INPUT
     din: input trace (1D, n1/nt)
+    dt: time interval
     inv: flag of inverse transform (0: forward; 1: inverse; default: 0)
-    opt:
-    sym:
-    
+    flo: default (0)
+    fhi: default (0.5 - Nyquist)
+    verb: verbosity
     
     OUTPUT
-    dout: output Time-frequency spectrum (first axis: Time; second axis: Frequency; third axis: imag/real)
+    dout: [forward] output Time-frequency spectrum (first axis: Time; second axis: Frequency; third axis: real/imag)
     NOTE: 1) dout is of size n1*nw*2 (e.g., dout.reshape([n1,nw,2],order='F'))
-          2) The first component in 3rd axis is Imaginary; and the second component is Real (Remember it when constructing a complex number)
+          2) The first component in 3rd axis is Real; and the second component is Imaginary (Remember it when constructing a complex number)
+          3) The third axis real/imag sequence of stft1d is opposite to the case in ntfa1d (pyntfa)
+          w0,dw,nw: intuitive frequency axis
+          [inverse] reconstructed trace
     
     EXAMPLE
-    demos/test_pyntfa_syn1d_st.py
+    demos/test_pynpre_syn1d_stltft.py
     
     HISTORY
-    Original version by Yangkang Chen, Oct 28, 2024
+    Original version by Yangkang Chen, Oct 30, 2024
     
     """
     import numpy as np
@@ -55,20 +59,28 @@ def stft1d(din,dt=0.004,inv=0,opt=1,sym=0,ntw=7,ot=0,wind=0,verb=1):
     
     INPUT
     din: input trace (1D, n1/nt)
-
+    dt: time interval
     inv: flag of inverse transform (0: forward; 1: inverse; default: 0)
+    opt: optimal FFT size
+    sym: apply symmetric Fourier transform
+    ntw: size of short-time window
+    ot: starting time
+    wind: if applying Hanning window
+    verb: verbosity
     
     OUTPUT
-    dout: output Time-frequency spectrum (first axis: Time; second axis: Frequency; third axis: imag/real)
+    dout: [forward] output Time-frequency spectrum (first axis: Time; second axis: Frequency; third axis: real/imag)
     NOTE: 1) dout is of size n1*nw*2 (e.g., dout.reshape([n1,nw,2],order='F'))
           2) The first component in 3rd axis is Real; and the second component is Imaginary (Remember it when constructing a complex number)
           3) The third axis real/imag sequence of stft1d is opposite to the case in ntfa1d (pyntfa)
+          w0,dw,nw: intuitive frequency axis
+          [inverse] reconstructed trace
     
     EXAMPLE
-    demos/test_pyntfa_syn1d_st.py
+    demos/test_pynpre_syn1d_stltft.py
     
     HISTORY
-    Original version by Yangkang Chen, Oct 28, 2024
+    Original version by Yangkang Chen, Oct 30, 2024
     
     """
     import numpy as np
