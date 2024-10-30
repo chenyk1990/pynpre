@@ -1,6 +1,6 @@
 from ftfacfun import *
 
-def st1d(din,dt=0.004,inv=0,opt=1,sym=0,ntw=7,ot=0,wind=0,verb=1):
+def st1d(din,dt=0.004,inv=0,flo=0,fhi=0.5,verb=1):
     """
     st1d: S transform for 1D signals
     
@@ -30,10 +30,22 @@ def st1d(din,dt=0.004,inv=0,opt=1,sym=0,ntw=7,ot=0,wind=0,verb=1):
     
     print(n1)
     
-    dtmp=stft1d(din.flatten(order='F'),n1,verb,wind,inv,sym,opt,ntw,dt,ot)
+    dtmp=st1dc(din.flatten(order='F'),n1,verb,inv,flo,fhi,dt)
     
-    
-    return dtmp
+    if inv==0:
+        nw=np.int32((dtmp.size-3)/n1/2);
+        dout=dtmp[0:n1*nw*2]
+        w0=dtmp[n1*nw*2]    #different from PYntfa
+        dw=dtmp[n1*nw*2+1]  #different from PYntfa
+        nw2=np.int32(dtmp[n1*nw*2+2])
+        print(dtmp.size,w0,dw,nw2)
+        if nw2 != nw:
+            print('nw=',nw,'nw2=',nw2,'dimension discrepancy')
+        else:
+            print('dimension consistent')
+        return dout,w0,dw,nw
+    else:
+        return dtmp
     
     
 
