@@ -19,59 +19,61 @@
 #This synthetic data was used in Huang et al., 2016, Damped multichannel singular spectrum analysis for 3D random noise attenuation, Geophysics, 81, V261-V270.
 import numpy as np
 import matplotlib.pyplot as plt
-import pydrr as pd #pd: DRR
+import pydrr as pd #pd: DRR #pip install pydrr
 import pynpre as npre
 
-## generate the synthetic data
-a1=np.zeros([300,20])
-[n,m]=a1.shape
-a3=np.zeros([300,20])
-a4=np.zeros([300,20])
-
-k=-1;
-a=0.1;
-b=1;
-pi=np.pi
-
-ts=np.arange(-0.055,0.055+0.002,0.002)
-b1=np.zeros([len(ts)])
-b2=np.zeros([len(ts)])
-b3=np.zeros([len(ts)])
-b4=np.zeros([len(ts)])
-
-for t in ts:
-    k=k+1;
-    b1[k]=(1-2*(pi*30*t)*(pi*30*t))*np.exp(-(pi*30*t)*(pi*30*t));
-    b2[k]=(1-2*(pi*40*t)*(pi*40*t))*np.exp(-(pi*40*t)*(pi*40*t));
-    b3[k]=(1-2*(pi*40*t)*(pi*40*t))*np.exp(-(pi*40*t)*(pi*40*t));
-    b4[k]=(1-2*(pi*30*t)*(pi*30*t))*np.exp(-(pi*30*t)*(pi*30*t));
-
-t1=np.zeros([m],dtype='int')
-t3=np.zeros([m],dtype='int')
-t4=np.zeros([m],dtype='int')
-for i in range(m):
-  t1[i]=np.round(140);
-  t3[i]=np.round(-6*i+180);
-  t4[i]=np.round(6*i+10);
-  a1[t1[i]:t1[i]+k+1,i]=b1; 
-  a3[t3[i]:t3[i]+k+1,i]=b1; 
-  a4[t4[i]:t4[i]+k+1,i]=b1; 
-
-temp=a1[0:300,:]+a3[0:300,:]+a4[0:300,:];
-
-shot=np.zeros([300,20,20])
-for j in range(20):
-    a4=np.zeros([300,20]);
-    for i in range(m):
-    	t4[i]=np.round(6*i+10+3*j); 
-    	a4[t4[i]:t4[i]+k+1,i]=b1;
-  
-    	t1[i]=np.round(140-2*j);
-    	a1[t1[i]:t1[i]+k+1,i]=b1;
-
-    shot[:,:,j]=a1[0:300,:]+a3[0:300,:]+a4[0:300,:];
-
-d0=shot
+## generate the synthetic data (either using the following codes or pyseistr.genplane3d)
+# a1=np.zeros([300,20])
+# [n,m]=a1.shape
+# a3=np.zeros([300,20])
+# a4=np.zeros([300,20])
+# 
+# k=-1;
+# a=0.1;
+# b=1;
+# pi=np.pi
+# 
+# ts=np.arange(-0.055,0.055+0.002,0.002)
+# b1=np.zeros([len(ts)])
+# b2=np.zeros([len(ts)])
+# b3=np.zeros([len(ts)])
+# b4=np.zeros([len(ts)])
+# 
+# for t in ts:
+#     k=k+1;
+#     b1[k]=(1-2*(pi*30*t)*(pi*30*t))*np.exp(-(pi*30*t)*(pi*30*t));
+#     b2[k]=(1-2*(pi*40*t)*(pi*40*t))*np.exp(-(pi*40*t)*(pi*40*t));
+#     b3[k]=(1-2*(pi*40*t)*(pi*40*t))*np.exp(-(pi*40*t)*(pi*40*t));
+#     b4[k]=(1-2*(pi*30*t)*(pi*30*t))*np.exp(-(pi*30*t)*(pi*30*t));
+# 
+# t1=np.zeros([m],dtype='int')
+# t3=np.zeros([m],dtype='int')
+# t4=np.zeros([m],dtype='int')
+# for i in range(m):
+#   t1[i]=np.round(140);
+#   t3[i]=np.round(-6*i+180);
+#   t4[i]=np.round(6*i+10);
+#   a1[t1[i]:t1[i]+k+1,i]=b1; 
+#   a3[t3[i]:t3[i]+k+1,i]=b1; 
+#   a4[t4[i]:t4[i]+k+1,i]=b1; 
+# 
+# temp=a1[0:300,:]+a3[0:300,:]+a4[0:300,:];
+# 
+# shot=np.zeros([300,20,20])
+# for j in range(20):
+#     a4=np.zeros([300,20]);
+#     for i in range(m):
+#     	t4[i]=np.round(6*i+10+3*j); 
+#     	a4[t4[i]:t4[i]+k+1,i]=b1;
+#   
+#     	t1[i]=np.round(140-2*j);
+#     	a1[t1[i]:t1[i]+k+1,i]=b1;
+# 
+#     shot[:,:,j]=a1[0:300,:]+a3[0:300,:]+a4[0:300,:];
+# 
+# d0=shot
+from pyseistr import genplane3d #pip install git+https://github.com/aaspip/pyseistr
+d0=genplane3d()
 
 ## add noise
 [n1,n2,n3]=d0.shape

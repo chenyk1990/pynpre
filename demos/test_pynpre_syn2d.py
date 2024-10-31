@@ -5,7 +5,7 @@ import pyseistr as ps
 import pynpre as npre
 
 ## Generate synthetic data
-from pyseistr import gensyn
+from pyseistr import gensyn #pip install git+https://github.com/aaspip/pyseistr
 data=gensyn();
 data=data[:,0::10];#or data[:,0:-1:10];
 data=data/np.max(np.max(data));
