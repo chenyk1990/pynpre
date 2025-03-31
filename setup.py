@@ -57,7 +57,7 @@ ftfa_module = Extension('ftfacfun', sources=['pynpre/src/tf.c',
 setup(
     name="pynpre",
     version="0.0.2",
-    license='GNU General Public License, Version 3 (GPLv3)',
+    license='MIT License',
     description="A python package of non-stationary predictive filtering for denoising and interpolation of multi-dimensional multi-channel seismic data",
     long_description=long_description,
     author="pynpre developing team",
@@ -80,8 +80,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Physics",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+        "Topic :: Scientific/Engineering :: Physics"
     ],
     keywords=[
         "seismology", "earthquake seismology", "exploration seismology", "array seismology", "denoising", "science", "engineering", "structure", "local slope", "filtering"
