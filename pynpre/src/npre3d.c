@@ -54,7 +54,7 @@ static PyObject *Cfxynpre(PyObject *self, PyObject *args){
 	printf("r=%g,%g,%g\n",r1,r2,r3);
 
 
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     nd2=PyArray_NDIM(arrf1);
     

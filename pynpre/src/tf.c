@@ -85,7 +85,7 @@ static PyObject *stft1dc(PyObject *self, PyObject *args){
 
 	if(!inv)
 	{
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     nd2=PyArray_NDIM(arrf1);
     
@@ -149,7 +149,7 @@ static PyObject *stft1dc(PyObject *self, PyObject *args){
 	}else{
 	/*This part is to reconstruct the data given the basis functions and their weights (i.e., TF spectrum)*/
 	
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     for (i=0; i<n1*nw*2; i++)
     {
@@ -293,7 +293,7 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
 
     if(!inv)
     {
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     nd2=PyArray_NDIM(arrf1);
     
@@ -392,7 +392,7 @@ static PyObject *st1dc(PyObject *self, PyObject *args){
     }else{
     /*This part is to reconstruct the data given the basis functions and their weights (i.e., TF spectrum)*/
     
-    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_IN_ARRAY);
+    arrf1 = PyArray_FROM_OTF(f1, NPY_FLOAT, NPY_ARRAY_IN_ARRAY);
     
     for (i=0; i<n1*nw*2; i++)
     {
